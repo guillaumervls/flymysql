@@ -1,0 +1,23 @@
+app          = "$FLY_APP_NAME"
+kill_signal  = "SIGINT"
+kill_timeout = 5
+
+primary_region = "$REGION"
+
+[processes]
+  db = "--datadir /data/mysql --default-authentication-plugin mysql_native_password --performance-schema=OFF --innodb-buffer-pool-size 64M"
+
+[mounts]
+  destination = "/data"
+  processes   = [ "db" ]
+  source      = "mysqldata"
+
+[env]
+  MYSQL_DATABASE = "$MYSQL_DATABASE"
+  MYSQL_USER     = "$MYSQL_USER"
+
+# As of 04/25/2023:
+# MySQL 8.0.33 has a bug in it
+# so avoid that specific version
+[build]
+  image = "mysql:8.0.32"

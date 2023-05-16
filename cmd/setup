@@ -1,0 +1,32 @@
+#! /bin/sh
+
+read -p "Region [$FLY_REGION]: " REGION_PROMPT
+export REGION=${REGION_PROMPT:-$FLY_REGION}
+
+read -p "Disk space in GB [10]: " VOLUME_SIZE_GB_PROMPT
+VOLUME_SIZE_GB=${VOLUME_SIZE_GB_PROMPT:-10}
+
+read -p "Database name [db]: " MYSQL_DATABASE_PROMPT
+export MYSQL_DATABASE=${MYSQL_DATABASE_PROMPT:-db}
+
+read -p "Non root user name [app]: " MYSQL_USER_PROMPT
+export MYSQL_USER=${MYSQL_USER_PROMPT:-app}
+
+read -p "Password for $MYSQL_USER user [random string]: " MYSQL_PASSWORD_PROMPT
+MYSQL_PASSWORD=${MYSQL_PASSWORD_PROMPT:-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c20)}
+
+read -p "Password for root user [random string]: " MYSQL_ROOT_PASSWORD_PROMPT
+MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD_PROMPT:-$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c20)}
+
+cat fly.template.toml | envsubst > fly.toml
+
+fly volumes create mysqldata --size $VOLUME_SIZE_GB
+fly secrets set MYSQL_PASSWORD=$MYSQL_PASSWORD MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+
+fly deploy
+fly scale memory 2048
+
+echo "Your MySQL database has been deployed!"
+echo "Root password is: $MYSQL_ROOT_PASSWORD"
+echo "$MYSQL_USER password is: $MYSQL_PASSWORD"
+echo "Keep those carefully. Happy DB-ing on Fly.io!"
