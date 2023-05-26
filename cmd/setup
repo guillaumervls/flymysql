@@ -23,8 +23,7 @@ cat fly.template.toml | envsubst > fly.toml
 fly volumes create mysqldata --size $VOLUME_SIZE_GB
 fly secrets set MYSQL_PASSWORD=$MYSQL_PASSWORD MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
 
-fly deploy
-fly scale memory 2048
+fly deploy --vm-memory 2048
 
 echo "Your MySQL database has been deployed!"
 echo "Root password is: $MYSQL_ROOT_PASSWORD"
